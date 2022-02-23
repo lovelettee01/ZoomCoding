@@ -16,7 +16,15 @@ const server = Http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 wss.on("connection", (socket) => {
-  console.log(socket);
+  console.log("Connected to Browser !!!");
+
+  socket.on("close", () => {
+    console.log("Disconnection from client");
+  });
+  socket.on("message", (message) => {
+    console.log("from client Message", message.toString("utf8"));
+  });
+  socket.send("Hello!!!");
 });
 
 server.listen(3000, handelListen);
