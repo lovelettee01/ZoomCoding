@@ -15,14 +15,28 @@ const handelListen = () => console.log(`Listening on Http://localhost:3000`);
 const server = Http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+const sockets = [];
+let nickName = "";
 wss.on("connection", (socket) => {
+  sockets.push(socket);
   console.log("Connected to Browser !!!");
 
   socket.on("close", () => {
     console.log("Disconnection from client");
   });
   socket.on("message", (message) => {
-    console.log("from client Message", message.toString("utf8"));
+    const msgObj = JSON.parse(message.toString("utf8"));
+    console.log("from client Message", msgObj);
+    switch (msgObj.type) {
+      case "sendMsg":
+        sockets.forEach((accSocket) => {
+          accSocket.send(`[${socket.nickName}] 😀${msgObj.payload}`);
+        });
+        break;
+      case "nickName":
+        socket["nickName"] = msgObj.payload;
+        break;
+    }
   });
   socket.send("Hello!!!");
 });

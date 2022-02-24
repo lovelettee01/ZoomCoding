@@ -12,6 +12,12 @@ html(lang="en")
             h1 Noom 
 
         main 
-            h1 It Work!!
+            ul 
+            form(method="post",id="nickForm")  
+                input(type="text", placeholder="choose a nikname" required)
+                button Send
+            form(method="post",id="msgForm")  
+                input(type="text", placeholder="write a Message" required)
+                button Send
     
     script(src="/public/js/app.js")
