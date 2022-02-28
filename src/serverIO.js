@@ -27,6 +27,18 @@ wsSocket.on("connection", (socket) => {
     done({ isSucces: true, msg: "성공" });
     socket.to(roomName).emit("welcome", { id: socket.id });
   });
+
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) =>
+      socket.to(room).emit("bye", { id: socket.id })
+    );
+  });
+
+  socket.on("sendMessage", (data, room, done) => {
+    const message = data.payload;
+    socket.to(room).emit("newMessage", { id: socket.id, msg: message });
+    done();
+  });
 });
 
 httpServer.listen(3000, handelListen);

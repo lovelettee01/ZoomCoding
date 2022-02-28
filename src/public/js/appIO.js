@@ -11,11 +11,23 @@ window.addEventListener("load", () => {
   room.hidden = true;
 });
 
-socket.on("welcome", (data) => {
+function addMessage(message) {
   const ul = room.querySelector("ul");
   const li = document.createElement("li");
-  li.innerHTML = `[${data.id}] Joined Room!!~`;
+  li.innerHTML = message;
   ul.appendChild(li);
+}
+
+socket.on("welcome", (data) => {
+  addMessage(`[${data.id}] Joined Room!!~`);
+});
+
+socket.on("bye", (data) => {
+  addMessage(`[${data.id}] lefted Room!!~`);
+});
+
+socket.on("newMessage", (data) => {
+  addMessage(`[${data.id}] : ${data.msg}`);
 });
 
 wForm.addEventListener("submit", (e) => {
@@ -32,4 +44,11 @@ wForm.addEventListener("submit", (e) => {
 
 rForm.addEventListener("submit", (e) => {
   e.preventDefault();
+
+  const input = rForm.querySelector("input");
+  const value = input.value;
+  socket.emit("sendMessage", { payload: input.value }, roomName, () => {
+    addMessage(`You Send Message : ${value}`);
+  });
+  input.value = "";
 });
