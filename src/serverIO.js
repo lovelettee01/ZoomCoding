@@ -16,11 +16,13 @@ const httpServer = Http.createServer(app);
 const wsSocket = new Server(httpServer);
 
 wsSocket.on("connection", (socket) => {
+  socket.onAny((e) => {
+    console.log(`onAyn >> ${e}`);
+  });
+
   socket.on("enterRoom", (data, done) => {
     const roomName = data.payload;
-    socket.onAny((e) => {
-      console.log(`onAyn >> ${e}`);
-    });
+
     socket.join(roomName);
     done({ isSucces: true, msg: "성공" });
     socket.to(roomName).emit("welcome", { id: socket.id });
