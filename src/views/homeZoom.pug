@@ -12,16 +12,17 @@ html(lang="en")
             h1 Noom 
 
         main 
-        div#welcome
-            form(action="") 
-                input(placeholder="Room Name", required, type="text")
-        div#call
-            div#myStream
-                video#myFace(autoplay, playsinline, width="400", height="400")
-                button#mute Mute
-                button#camera Turn Camera Off
-                select#cameras
-                    option(value="device1") Face Camera1
-                    option(value="device2") Face Camera2
+            div#welcome
+                form(action="") 
+                    input(placeholder="Room Name", required, type="text")
+                    button#enterRoom Enter Room
+            div#zoomCall
+                h3
+                div#myStream
+                    video#myFace(autoplay, playsinline, width="400", height="400")
+                    button#mute Mute
+                    button#camera Turn Camera Off
+                    select#cameras
+                ul
         script(src="/socket.io/socket.io.js")
         script(src="/public/js/appZoom.js") 

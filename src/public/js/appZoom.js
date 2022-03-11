@@ -1,5 +1,32 @@
 const socket = io();
 
+//-----------------------------------------------------------------------
+// Welcome Code
+//-----------------------------------------------------------------------
+
+const welcome = document.getElementById("welcome");
+const welcomeForm = welcome.querySelector("form");
+
+let roomName;
+//Enter Room Click Btn Event
+welcomeForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = welcomeForm.querySelector("input");
+  socket.emit("enterRoom", { payload: input.value }, (result) => {
+    zoomCall.querySelector(
+      "h3"
+    ).innerText = `Room Name is ${roomName} (${result.count})`;
+    viewRoom(true);
+  });
+  roomName = input.value;
+  input.value = "";
+});
+
+//-----------------------------------------------------------------------
+// Zoom Call Code
+//-----------------------------------------------------------------------
+
+const zoomCall = document.getElementById("zoomCall");
 const myFace = document.getElementById("myface");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
@@ -7,7 +34,10 @@ const cameraSelect = document.getElementById("cameras");
 
 let isMuted = false;
 let isCameraOff = false;
+
 let myStream;
+let myPeerConnection;
+
 async function getMedia(params) {
   const userMediaConstraints = Object.assign(
     {
@@ -86,11 +116,57 @@ cameraSelect.addEventListener("input", (e) => {
   const params = { video: { deviceId: e.target.value } };
   getMedia(params);
 });
+
+//-----------------------------------------------------------------------
+// Common Code
+//-----------------------------------------------------------------------
+
 //Onload
 window.addEventListener("load", () => {
   if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
     console.log("enumerateDevices()를 지원하지 않습니다.");
     return;
   }
-  getMedia();
+  viewRoom(false);
 });
+
+async function viewRoom(isView) {
+  welcome.hidden = isView;
+  zoomCall.hidden = !isView;
+  if (isView) {
+    await getMedia();
+    initPeerConnection();
+  }
+}
+
+//-----------------------------------------------------------------------
+// Socket Function
+//-----------------------------------------------------------------------
+function addMessage(message) {
+  const ul = zoomCall.querySelector("ul");
+  const li = document.createElement("li");
+  li.innerHTML = message;
+  ul.appendChild(li);
+}
+
+socket.on("welcome", async (data) => {
+  console.log("welcome log ", data);
+  zoomCall.querySelector(
+    "h3"
+  ).innerText = `Room Name is ${roomName} (${data.count})`;
+  addMessage(`[${data.nickname}] Joined Room!!~`);
+
+  const offer = await myPeerConnection.createOffer();
+  console.log(myPeerConnection, offer);
+  myPeerConnection.setLocalDescription(offer);
+});
+
+//-----------------------------------------------------------------------
+// Socket RTC Code
+//-----------------------------------------------------------------------
+function initPeerConnection() {
+  myPeerConnection = new RTCPeerConnection();
+  myStream
+    .getTracks()
+    .forEach((track) => myPeerConnection.addTrack(track, myStream));
+}
