@@ -43,6 +43,18 @@ wsSocket.on("connection", (socket) => {
       count: userCount,
     });
   });
+
+  socket.on("forwardOffer", (offer, roomName) => {
+    socket.to(roomName).emit("reciveOffer", offer);
+  });
+
+  socket.on("forwardAnswer", (answer, roomName) => {
+    socket.to(roomName).emit("reciveAnswer", answer);
+  });
+
+  socket.on("iceCnadidate", (icecandidate, roomName) => {
+    socket.to(roomName).emit("iceCnadidate", icecandidate);
+  });
 });
 
 httpServer.listen(3000, handelListen);
