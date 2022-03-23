@@ -117,9 +117,12 @@ cameraSelect.addEventListener("input", (e) => {
   const params = { video: { deviceId: e.target.value } };
   await getMedia(params);
   if (myPeerConnection) {
+    const videoTrack = myStream.getVideoTracks()[0];
     const videoSender = myPeerConnection
       .getSenders()
       .find((sender) => sender.track.kind === "video");
+
+    videoSender.replaceTrack(videoTrack);
   }
 });
 
