@@ -32,6 +32,10 @@ function countRoom(roomNm) {
 
 wsSocket.on("connection", (socket) => {
   socket["nickname"] = `Anonymous_${Date.now()}`;
+  socket.onAny((e) => {
+    console.log(`onAyn >> ${e}`);
+  });
+
   socket.on("enterRoom", (data, done) => {
     const roomName = data.payload;
     socket.join(roomName);

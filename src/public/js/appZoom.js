@@ -3,7 +3,7 @@ const socket = io();
 //-----------------------------------------------------------------------
 // Welcome Code
 //-----------------------------------------------------------------------
-
+let isSupport = true;
 const welcome = document.getElementById("welcome");
 const welcomeForm = welcome.querySelector("form");
 
@@ -11,6 +11,10 @@ let roomName;
 //Enter Room Click Btn Event
 welcomeForm.addEventListener("submit", (e) => {
   e.preventDefault();
+  if (!isSupport) {
+    alert("지원안함!");
+    return;
+  }
   const input = welcomeForm.querySelector("input");
   viewRoom(true);
   socket.emit("enterRoom", { payload: input.value }, (result) => {
@@ -27,7 +31,7 @@ welcomeForm.addEventListener("submit", (e) => {
 //-----------------------------------------------------------------------
 
 const zoomCall = document.getElementById("zoomCall");
-const myFace = document.getElementById("myface");
+const myFace = document.getElementById("myFace");
 const peerFace = document.getElementById("peerFace");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
@@ -54,6 +58,7 @@ async function getMedia(params) {
       await getUserDevices("videoinput");
     }
   } catch (e) {
+    alert(e);
     console.log(e, myStream);
   }
 }
@@ -113,8 +118,8 @@ cameraBtn.addEventListener("click", () => {
 });
 
 //Camera Select
-cameraSelect.addEventListener("input", (e) => {
-  const params = { video: { deviceId: e.target.value } };
+cameraSelect.addEventListener("input", async (e) => {
+  const params = { video: { deviceId: { exact: e.target.value } } };
   await getMedia(params);
   if (myPeerConnection) {
     const videoTrack = myStream.getVideoTracks()[0];
@@ -132,16 +137,19 @@ cameraSelect.addEventListener("input", (e) => {
 
 //Onload
 window.addEventListener("load", () => {
+  viewRoom(false);
+  alert(navigator.mediaDevices);
   if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
     console.log("enumerateDevices()를 지원하지 않습니다.");
+    isSupport = false;
     return;
   }
-  viewRoom(false);
 });
 
 async function viewRoom(isView) {
   welcome.hidden = isView;
   zoomCall.hidden = !isView;
+  if (!isSupport) return;
   if (isView) {
     await getMedia();
     initPeerConnection();
@@ -206,7 +214,9 @@ function initPeerConnection() {
     peerFace.srcObject = data.stream;
   });
 
-  myStream
-    .getTracks()
-    .forEach((track) => myPeerConnection.addTrack(track, myStream));
+  if (myStream) {
+    myStream
+      .getTracks()
+      .forEach((track) => myPeerConnection.addTrack(track, myStream));
+  }
 }
